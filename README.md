@@ -17,71 +17,61 @@ To write a YACC program to recognize the grammar a^nb where n>=10.
 
 ### anb.l
 ```
+// anb.l file
 %{
-#include "expr5.tab.h"
+/* Definition section */ #include "y.tab.h"
 %}
 
+/* Rule Section */
+%%
+[aA] {return A;}
+[bB] {return B;}
+\n {return NL;}
+. {return yytext[0];}
 %%
 
-a       { return A; }
-b       { return B; }
-\n      { return '\n'; }
-.       { return INVALID; }
-
-%%
-int yywrap() {
-    return 1;
+int yywrap()
+{
+return 1;
 }
 
 
-```
+// anb.y file
 
-### anb.y
-```
 %{
-#include <stdio.h>
-#include <stdlib.h>
-
-int count = 0;  // count of 'a's
-int yylex(void);
-void yyerror(const char *s);
+/* Definition section */ #include<stdio.h> #include<stdlib.h>
 %}
 
-%token A B INVALID
+%token A B NL
 
+/* Rule Section */
+%%
+stmt: S NL { printf("valid string\n");
+exit(0); }
+;
+S: A S B |;
 %%
 
-input:
-    A_seq B '\n' {
-        if (count >= 10) {
-            printf("Valid string: a^n b where n >= 10\n");
-        } else {
-            printf("Invalid: less than 10 'a's before 'b'\n");
-        }
-        count = 0; // reset for next input
-    }
-  | INVALID '\n' {
-        printf("Invalid character in input.\n");
-        count = 0;
-    }
-  ;
-
-A_seq:
-    A           { count = 1; }
-  | A_seq A     { count++; }
-  ;
-
-%%
-
-int main() {
-    printf("Enter strings (e.g., aaa...ab), one per line (Ctrl+D to quit):\n");
-    while (yyparse() == 0);
-    return 0;
+int yyerror(char *msg)
+{
+ 
+printf("invalid string\n"); exit(0);
 }
 
-void yyerror(const char *s) {
-    // Errors handled in grammar
+//driver code main()
+{
+printf("enter the string\n"); yyparse();
 }
+
+
+Commands:
+
+lex anb.l 
+yacc -d anb.y
+gcc lex.yy.c y.tab.c
+./a.out
+
+
 
 
 ```
